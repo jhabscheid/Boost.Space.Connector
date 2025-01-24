@@ -18,10 +18,8 @@ A WordPress plugin that safely connects your site to make.com and allows working
 - Added success messages after key regeneration
 
 ### Plugin Metadata Updates
-- Updated author to Joe Habscheid
-- Updated website to https://habscheid.com
+
 - Incremented version number to 1.5.9
-- Directory renamed from boost-space-connector to integromat-connector
 
 ## Installation
 
