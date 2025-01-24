@@ -26,6 +26,14 @@ function sanitizeUrl(url) {
   return url.replace(/\/$/, '');
 }
 
+function ensureHTTPS(url) {
+  if (!url) return url;
+  if (!/^https?:\/\//i.test(url)) {
+    return 'https://' + url;
+  }
+  return url;
+}
+
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request))
 })
@@ -136,6 +144,10 @@ async function handleRequest(request) {
     
     const { wordpress_api_key, wordpressurl, featuredimageurl, post_content, status = 'draft' } = params;
 
+    // Ensure URLs have HTTPS protocol
+    params.wordpressurl = ensureHTTPS(wordpressurl);
+    params.featuredimageurl = ensureHTTPS(featuredimageurl);
+
     // Validate parameters
     try {
       validateParams(params);
@@ -161,8 +173,8 @@ async function handleRequest(request) {
       });
     }
 
-    const contentType = imageResponse.headers.get('content-type');
-    if (!contentType || !contentType.startsWith('image/')) {
+    const imageContentType = imageResponse.headers.get('content-type');
+    if (!imageContentType || !imageContentType.startsWith('image/')) {
       return new Response(JSON.stringify({
         success: false,
         error: 'Invalid content type. URL must point to an image file.'
@@ -173,11 +185,11 @@ async function handleRequest(request) {
     }
 
     const imageBuffer = await imageResponse.arrayBuffer();
-    const imageBlob = new Blob([imageBuffer], { type: contentType });
+    const imageBlob = new Blob([imageBuffer], { type: imageContentType });
 
     // Upload image to WordPress
     const formData = new FormData();
-    formData.append('file', imageBlob, 'featured-image' + (contentType === 'image/jpeg' ? '.jpg' : '.png'));
+    formData.append('file', imageBlob, 'featured-image' + (imageContentType === 'image/jpeg' ? '.jpg' : '.png'));
 
     const baseUrl = sanitizeUrl(wordpressurl);
     console.log('Uploading media to WordPress...');

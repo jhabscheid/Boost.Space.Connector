@@ -149,6 +149,31 @@ def test_publish_to_wordpress_invalid_author_id(mocker):
     assert 'Request failed' in result
     assert 'author_id must be a valid integer' in result
 
+def test_publish_to_wordpress_without_protocol(mocker):
+    """Test handling of URLs without http(s):// protocol"""
+    mock_response = create_mock_response(200, {
+        'success': True,
+        'post_id': 123,
+        'post_url': 'https://example.com/post/123',
+        'post_url_slug': 'https://example.com/protocol-test',
+        'media_id': 456,
+        'message': 'Successfully created draft post'
+    })
+    mocker.patch('requests.post', return_value=mock_response)
+
+    result = publish_to_wordpress(
+        worker_url='test-worker.example.com',  # No protocol
+        wordpress_api_key='test_key',
+        wordpressurl='example.com',  # No protocol
+        featuredimageurl='storage.googleapis.com/image.jpg',  # No protocol
+        post_content='<h1>Protocol Test</h1>',
+        title='Protocol Test'
+    )
+    
+    assert 'Successfully created' in result
+    assert '123' in result
+    assert 'https://example.com/post/123' in result
+
 def test_publish_to_wordpress_validation_error(mocker):
     # Mock validation error response for invalid status
     mock_response = create_mock_response(400, {
