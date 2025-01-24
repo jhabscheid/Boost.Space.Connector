@@ -4,8 +4,8 @@ add_action(
 	'admin_menu',
 	function () {
 		add_menu_page(
-			'Make',
-			'Make',
+			'Make-Boost',
+			'Make-Boost',
 			'manage_options',
 			'integromat',
 			function () {

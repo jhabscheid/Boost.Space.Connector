@@ -43,12 +43,7 @@ function add_general_menu() {
 					readonly="readonly" 
 					value="<?php echo esc_attr( $api_token ); ?>" 
 					class="w-300">
-				<form method="POST" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display: inline-block; margin-left: 10px;">
-					<?php wp_nonce_field('regenerate_key_nonce'); ?>
-					<input type="hidden" name="action" value="regenerate_key" />
-					<button type="submit" class="button button-secondary">Regenerate Key</button>
-				</form>
-				<p class="comment">Use this token when creating a new connection in the WordPress app. Click "Regenerate Key" to create a new API key if needed.</p>
+				<p class="comment">Use this token when creating a new connection in the WordPress app.</p>
 			<?php
 		},
 		'integromat_main',
