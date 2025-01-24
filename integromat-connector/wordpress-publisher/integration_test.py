@@ -2,10 +2,10 @@ import os
 from wordpress_publisher import publish_to_wordpress
 
 # Test configuration
-WORKER_URL = "https://wordpress-publisher.suupport.workers.dev"
-WORDPRESS_API_KEY = "d3b1uwh5lpmmvonji4j0dwrq9blbaww0"
-WORDPRESS_URL = "https://habscheid.com"
-FEATURED_IMAGE_URL = "https://storage.googleapis.com/msgsndr/Hlx8paz7VAhWjOlUH1CA/media/679142d87853c4769793452d.jpeg"
+WORKER_URL = os.getenv('WORDPRESS_WORKER_URL', 'https://your-worker.workers.dev')
+WORDPRESS_API_KEY = os.getenv('WORDPRESS_API_KEY', 'your-api-key')
+WORDPRESS_URL = os.getenv('WORDPRESS_URL', 'https://your-wordpress-site.com')
+FEATURED_IMAGE_URL = os.getenv('FEATURED_IMAGE_URL', 'https://example.com/test-image.jpg')
 
 def test_basic_post():
     """Test basic post creation with featured image"""
