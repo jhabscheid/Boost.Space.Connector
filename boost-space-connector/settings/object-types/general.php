@@ -1,6 +1,26 @@
 <?php
 namespace Integromat;
 
+add_action('admin_post_regenerate_key', function() {
+    if (!current_user_can('manage_options')) {
+        wp_die(__('You do not have sufficient permissions to access this page.'));
+    }
+    
+    check_admin_referer('regenerate_key_nonce');
+    
+    $new_key = Api_Token::generate(Api_Token::API_TOKEN_LENGTH);
+    update_site_option(Api_Token::API_TOKEN_IDENTIFIER, $new_key);
+    
+    wp_redirect(add_query_arg(
+        array(
+            'page' => 'integromat',
+            'settings-updated' => 'true'
+        ),
+        admin_url('admin.php')
+    ));
+    exit;
+});
+
 function add_general_menu() {
 	register_setting( 'integromat_main', 'iwc-logging-enabled' ); // register the same name in settings as before to pick it up in old installations.
 
@@ -23,7 +43,12 @@ function add_general_menu() {
 					readonly="readonly" 
 					value="<?php echo esc_attr( $api_token ); ?>" 
 					class="w-300">
-				<p class="comment">Use this token when creating a new connection in the WordPress app.</p>
+				<form method="POST" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display: inline-block; margin-left: 10px;">
+					<?php wp_nonce_field('regenerate_key_nonce'); ?>
+					<input type="hidden" name="action" value="regenerate_key" />
+					<button type="submit" class="button button-secondary">Regenerate Key</button>
+				</form>
+				<p class="comment">Use this token when creating a new connection in the WordPress app. Click "Regenerate Key" to create a new API key if needed.</p>
 			<?php
 		},
 		'integromat_main',
