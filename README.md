@@ -23,9 +23,19 @@ A WordPress plugin that safely connects your site to make.com and allows working
 
 ## Installation
 
+### Quick Install (Recommended)
+1. Download `integromat-connector1.59.zip` from the root directory of this repository
+2. In WordPress admin, go to Plugins > Add New > Upload Plugin
+3. Choose the downloaded zip file and click "Install Now"
+4. Activate the plugin through the "Plugins" menu
+
+### Manual Installation
 1. Upload the "integromat-connector" folder to the "/wp-content/plugins/" directory
 2. Activate the plugin through the "Plugins" menu in WordPress
-3. Find the "Make-Boost" menu item in your admin panel to:
+
+### Configuration
+After installation:
+1. Find the "Make-Boost" menu item in your admin panel to:
    - View your API key for connecting to Make.com
    - Regenerate your API key if needed
    - Configure custom fields visibility in REST API responses
