@@ -40,18 +40,24 @@ def publish_to_wordpress(
             'author_id': author_id,
             'category_id': category_id
         }
-        print("\nSending request to worker with data:", json.dumps(request_data, indent=2))
+        # Remove sensitive data from logs
+        log_data = request_data.copy()
+        log_data['wordpress_api_key'] = '***'
+        print("\nSending request to worker with data:", json.dumps(log_data, indent=2))
         
         response = requests.post(worker_url, json=request_data)
         print(f"\nResponse status code: {response.status_code}")
-        print("Response headers:", dict(response.headers))
         
         try:
             response_text = response.text
-            print("\nRaw response text:", response_text)
-            
             result = response.json()
-            print("\nParsed response:", json.dumps(result, indent=2))
+            
+            # Mask sensitive data in response logs
+            if isinstance(result, dict):
+                log_result = result.copy()
+                if 'wordpress_api_key' in log_result:
+                    log_result['wordpress_api_key'] = '***'
+                print("\nParsed response:", json.dumps(log_result, indent=2))
             
             if response.status_code == 200 and result.get('success'):
                 response_parts = [

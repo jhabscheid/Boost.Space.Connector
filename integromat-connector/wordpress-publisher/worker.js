@@ -31,10 +31,14 @@ addEventListener('fetch', event => {
 })
 
 async function handleRequest(request) {
-  // Log request details
+  // Log request details (excluding sensitive headers)
+  const headers = Object.fromEntries(request.headers.entries());
+  if (headers['iwc-api-key']) {
+    headers['iwc-api-key'] = '***';
+  }
   console.log('Request details:', {
     method: request.method,
-    headers: Object.fromEntries(request.headers.entries()),
+    headers: headers,
     url: request.url
   });
 
@@ -61,11 +65,22 @@ async function handleRequest(request) {
       // First try to parse as JSON
       const clonedRequest = request.clone();
       const text = await clonedRequest.text();
-      console.log('Raw request body:', text);
+      // Mask sensitive data in logs
+    let logText;
+    try {
+        const logData = JSON.parse(text);
+        if (logData.wordpress_api_key) {
+            logData.wordpress_api_key = '***';
+        }
+        logText = JSON.stringify(logData);
+    } catch {
+        logText = '[unparseable request body]';
+    }
+    console.log('Raw request body:', logText);
       
-      try {
+    try {
         params = JSON.parse(text);
-      } catch (jsonError) {
+    } catch (jsonError) {
         console.log('Failed to parse as JSON, trying form data');
         // If JSON parsing fails, try form data
         const formData = new URLSearchParams(text);
@@ -83,20 +98,40 @@ async function handleRequest(request) {
       });
     }
 
-    console.log('Parsed parameters:', params);
-    console.log('Request headers:', Object.fromEntries(request.headers.entries()));
+    // Log parameters with sensitive data masked
+    const logParams = { ...params };
+    if (logParams.wordpress_api_key) {
+        logParams.wordpress_api_key = '***';
+    }
+    console.log('Parsed parameters:', logParams);
     
-    let params;
+    // Log headers with sensitive data masked
+    const logHeaders = Object.fromEntries(request.headers.entries());
+    if (logHeaders['iwc-api-key']) {
+        logHeaders['iwc-api-key'] = '***';
+    }
+    console.log('Request headers:', logHeaders);
+    
     const requestContentType = request.headers.get('content-type');
     console.log('Content-Type:', requestContentType);
     
     if (requestContentType && requestContentType.includes('application/x-www-form-urlencoded')) {
       const formData = await request.formData();
       params = Object.fromEntries(formData.entries());
-      console.log('Parsed form data:', params);
+      // Log form data with sensitive data masked
+      const logFormData = { ...params };
+      if (logFormData.wordpress_api_key) {
+          logFormData.wordpress_api_key = '***';
+      }
+      console.log('Parsed form data:', logFormData);
     } else {
       params = await request.json();
-      console.log('Parsed JSON data:', params);
+      // Log JSON data with sensitive data masked
+      const logJsonData = { ...params };
+      if (logJsonData.wordpress_api_key) {
+          logJsonData.wordpress_api_key = '***';
+      }
+      console.log('Parsed JSON data:', logJsonData);
     }
     
     const { wordpress_api_key, wordpressurl, featuredimageurl, post_content, status = 'draft' } = params;
@@ -149,7 +184,7 @@ async function handleRequest(request) {
     console.log('Request URL:', `${baseUrl}/wp-json/wp/v2/media`);
     console.log('Headers:', {
       'Accept': 'application/json',
-      'IWC-API-KEY': wordpress_api_key
+      'IWC-API-KEY': '***'
     });
     
     const uploadResponse = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
@@ -162,7 +197,12 @@ async function handleRequest(request) {
     });
     
     console.log('Media upload response status:', uploadResponse.status);
-    console.log('Media upload response headers:', Object.fromEntries(uploadResponse.headers.entries()));
+    // Log response headers without sensitive data
+    const responseHeaders = Object.fromEntries(uploadResponse.headers.entries());
+    if (responseHeaders['iwc-api-key']) {
+      responseHeaders['iwc-api-key'] = '***';
+    }
+    console.log('Media upload response headers:', responseHeaders);
 
     if (!uploadResponse.ok) {
       let errorText;
@@ -190,7 +230,16 @@ async function handleRequest(request) {
     let uploadResult;
     try {
       const responseText = await uploadResponse.text();
-      console.log('Raw media upload response:', responseText);
+      // Log media upload response with sensitive data masked
+      try {
+        const logResponse = JSON.parse(responseText);
+        if (logResponse.wordpress_api_key) {
+            logResponse.wordpress_api_key = '***';
+        }
+        console.log('Raw media upload response:', JSON.stringify(logResponse));
+      } catch {
+        console.log('Raw media upload response: [unparseable response]');
+      }
       
       try {
         uploadResult = JSON.parse(responseText);
@@ -279,7 +328,12 @@ async function handleRequest(request) {
     }
 
     const postResult = await postResponse.json();
-    console.log('Full post response:', JSON.stringify(postResult, null, 2));
+    // Log post response with sensitive data masked
+    const logPostResult = { ...postResult };
+    if (logPostResult.wordpress_api_key) {
+        logPostResult.wordpress_api_key = '***';
+    }
+    console.log('Full post response:', JSON.stringify(logPostResult, null, 2));
     
     // Get the slug-based URL by combining site URL with post slug
     const siteRoot = sanitizeUrl(wordpressurl);
