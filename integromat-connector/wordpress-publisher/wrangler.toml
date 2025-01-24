@@ -1,0 +1,10 @@
+name = "wordpress-publisher"
+main = "worker.js"
+compatibility_date = "2024-01-24"
+
+[vars]
+# Add any environment variables here if needed
+
+[observability]
+[observability.logs]
+enabled = true
